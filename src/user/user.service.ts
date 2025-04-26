@@ -8,11 +8,11 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-  ) {}
+  ) { }
 
   async findByEmail(email: string): Promise<User | null> {
     const user = this.userRepository.findOne({ where: { email } });
-    return user;
+    return user || null;
   }
 
   async findByEmailOrUsername(
@@ -25,7 +25,16 @@ export class UserService {
     return user;
   }
 
-  async save(user: User): Promise<User> {
-    return this.userRepository.save(user);
+  async findByResetToken(token: string): Promise<User | null> {
+    const user = await this.userRepository.findOne({
+      where: { resetPasswordToken: token },
+    });
+    return user || null;
   }
+
+  async save(user: User): Promise<User> {
+    return await this.userRepository.save(user);
+  }
+
+
 }

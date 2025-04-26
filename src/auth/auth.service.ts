@@ -10,13 +10,14 @@ import { User } from '../user/user.entity';
 import { RegisterDTO } from './dto/register.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtPayloadDto } from './dto/jwt-payload.dto';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthService {
   constructor(
     private jwtService: JwtService,
     private userService: UserService,
-  ) {}
+  ) { }
 
   async signIn(email: string, password: string) {
     const user: User | null = await this.userService.findByEmail(email);
@@ -51,4 +52,50 @@ export class AuthService {
     user.password_hash = bcrypt.hashSync(registerDto.password, 10);
     await this.userService.save(user);
   }
+
+  // Simpan token reset password di user.entity.ts
+  // dan tambahkan expiry (misalnya 1 jam)
+  async requestPasswordReset(email: string) {
+    const user = await this.userService.findByEmail(email);
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiry = new Date();
+    expiry.setHours(expiry.getHours() + 1); // 1 jam ke depan
+
+    user.resetPasswordToken = token;
+    user.resetPasswordExpires = expiry;
+    await this.userService.save(user);
+
+    // Ubah URL sesuai domain frontend kamu
+    const resetLink = `https://fieldtrip-fe.vercel.app/reset-password?token=${token}`;
+    console.log(`Reset password link: ${resetLink}`); // nanti kirim via email di sini
+
+    return { message: 'Reset link has been sent to email (simulasi).' };
+  }
+  // Simulasi kirim email
+  // Simulasi reset password
+  async resetPassword(token: string, newPassword: string) {
+    const user: User | null = await this.userService.findByResetToken(token);
+
+
+    if (
+      !user ||
+      !user.resetPasswordExpires ||
+      user.resetPasswordExpires < new Date()
+    ) {
+      throw new HttpException('Invalid or expired token', HttpStatus.BAD_REQUEST);
+    }
+
+    user.password_hash = bcrypt.hashSync(newPassword, 10);
+    user.resetPasswordToken = null;
+    user.resetPasswordExpires = null;
+    await this.userService.save(user);
+
+    return { message: 'Password successfully reset.' };
+  }
+
+
 }

@@ -5,7 +5,7 @@ import { AuthService } from './auth.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
   @Post('login')
   signIn(@Body() signInDto: LoginDTO) {
     return this.authService.signIn(signInDto.email, signInDto.password);
@@ -14,5 +14,14 @@ export class AuthController {
   @Post('register')
   register(@Body() registerDto: RegisterDTO) {
     return this.authService.register(registerDto);
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body() body: { email: string }) {
+    return this.authService.requestPasswordReset(body.email);
+  }
+  @Post('reset-password')
+  async resetPassword(@Body() body: { token: string, newPassword: string }) {
+    return this.authService.resetPassword(body.token, body.newPassword);
   }
 }
