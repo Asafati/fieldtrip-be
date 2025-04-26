@@ -32,10 +32,10 @@ export class User {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @Column({ nullable: true })
-  resetPasswordToken?: string;
+  @Column({ type: 'varchar', nullable: true })
+  resetPasswordToken: string | null;
 
   @Column({ nullable: true, type: 'timestamp' })
-  resetPasswordExpires?: Date;
+  resetPasswordExpires: Date | null;
 
 }
