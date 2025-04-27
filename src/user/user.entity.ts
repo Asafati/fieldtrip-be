@@ -20,11 +20,12 @@ export class User {
   @Column()
   password_hash: string;
 
-  @Column()
+  @Column({ nullable: true })
   profile_picture: string;
 
-  @Column()
+  @Column({ nullable: true })
   bio: string;
+
 
   @CreateDateColumn()
   created_at: Date;

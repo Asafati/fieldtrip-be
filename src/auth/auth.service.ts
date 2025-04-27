@@ -50,11 +50,13 @@ export class AuthService {
     user.email = registerDto.email;
     user.username = registerDto.username;
     user.password_hash = bcrypt.hashSync(registerDto.password, 10);
+
+    user.profile_picture = '';
+    user.bio = '';
+
     await this.userService.save(user);
   }
 
-  // Simpan token reset password di user.entity.ts
-  // dan tambahkan expiry (misalnya 1 jam)
   async requestPasswordReset(email: string) {
     const user = await this.userService.findByEmail(email);
     if (!user) {
@@ -70,7 +72,7 @@ export class AuthService {
     await this.userService.save(user);
 
     // Ubah URL sesuai domain frontend kamu
-    const resetLink = `https://fieldtrip-fe.vercel.app/reset-password?token=${token}`;
+    const resetLink = `https://fieldtrip-be.vercel.app/reset-password?token=${token}`;
     console.log(`Reset password link: ${resetLink}`); // nanti kirim via email di sini
 
     return { message: 'Reset link has been sent to email (simulasi).' };
